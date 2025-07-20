@@ -17,7 +17,7 @@ exports.login = async (req, res) => {
         }
         // You can add JWT or session logic here if needed
         const jalaliDate = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
-        res.status(200).json({ message: 'Login successful.', user: { user_id: user.user_id, user_email: user.user_email, user_name: user.user_name, user_role: user.user_role }, jalaliDate });
+        res.status(200).json({ message: 'Login successful.', user: { user_id: user.user_id, user_email: user.user_email, user_name: user.user_name, user_role: user.user_role, user_balance: user.user_balance }, jalaliDate });
     } catch (err) {
         res.status(500).json({ message: 'Login failed.', error: err.message });
     }

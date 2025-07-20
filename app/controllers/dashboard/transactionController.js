@@ -58,3 +58,52 @@ exports.buy = async (req, res) => {
         res.status(500).json({ message: 'Transaction failed.', error: err.message });
     }
 };
+
+exports.deposit = async (req, res) => {
+    const { user_id, amount } = req.body;
+    if (!user_id || !amount || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ message: 'Valid user_id and amount are required.' });
+    }
+    try {
+        // Update user balance
+        await pool.query('UPDATE users SET user_balance = user_balance + ? WHERE user_id = ?', [amount, user_id]);
+        // Insert transaction record
+        const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
+        await pool.query(
+            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date) VALUES (?, ?, ?, ?, ?, ?)',
+            [user_id, amount, 'deposit', 'completed', 'User deposit', persian_date]
+        );
+        res.status(201).json({ message: 'Deposit successful.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Deposit failed.', error: err.message });
+    }
+};
+
+exports.withdraw = async (req, res) => {
+    const { user_id, amount } = req.body;
+    if (!user_id || !amount || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ message: 'Valid user_id and amount are required.' });
+    }
+    try {
+        // Check current balance
+        const [rows] = await pool.query('SELECT user_balance FROM users WHERE user_id = ?', [user_id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        const currentBalance = parseFloat(rows[0].user_balance);
+        if (currentBalance < amount) {
+            return res.status(400).json({ message: 'Insufficient balance.' });
+        }
+        // Update user balance
+        await pool.query('UPDATE users SET user_balance = user_balance - ? WHERE user_id = ?', [amount, user_id]);
+        // Insert transaction record
+        const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
+        await pool.query(
+            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date) VALUES (?, ?, ?, ?, ?, ?)',
+            [user_id, amount, 'withdraw', 'completed', 'User withdrawal', persian_date]
+        );
+        res.status(201).json({ message: 'Withdrawal successful.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Withdrawal failed.', error: err.message });
+    }
+};
