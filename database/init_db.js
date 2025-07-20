@@ -33,6 +33,7 @@ async function main() {
         await runSqlFile(connection, path.join(__dirname, 'schema', 'create_transactions_table.mysql.sql'));
         await runSqlFile(connection, path.join(__dirname, 'schema', 'create_banks_table.mysql.sql'));
         await runSqlFile(connection, path.join(__dirname, 'schema', 'create_send_receive_table.mysql.sql'));
+        await runSqlFile(connection, path.join(__dirname, 'schema', 'create_ticket_table.mysql.sql'));
         console.log('All MySQL schema files executed.');
         await connection.end();
         process.exit(0);

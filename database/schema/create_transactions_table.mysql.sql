@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
     description VARCHAR(255),
     persian_date VARCHAR(50),
+    to_card VARCHAR(50) DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)

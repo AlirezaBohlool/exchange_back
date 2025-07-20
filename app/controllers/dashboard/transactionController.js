@@ -80,9 +80,9 @@ exports.deposit = async (req, res) => {
 };
 
 exports.withdraw = async (req, res) => {
-    const { user_id, amount } = req.body;
-    if (!user_id || !amount || isNaN(amount) || amount <= 0) {
-        return res.status(400).json({ message: 'Valid user_id and amount are required.' });
+    const { user_id, amount, to_card } = req.body;
+    if (!user_id || !amount || isNaN(amount) || amount <= 0 || !to_card) {
+        return res.status(400).json({ message: 'Valid user_id, amount, and to_card are required.' });
     }
     try {
         // Check current balance
@@ -96,14 +96,104 @@ exports.withdraw = async (req, res) => {
         }
         // Update user balance
         await pool.query('UPDATE users SET user_balance = user_balance - ? WHERE user_id = ?', [amount, user_id]);
-        // Insert transaction record
+        // Insert transaction record with to_card
         const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
         await pool.query(
-            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date) VALUES (?, ?, ?, ?, ?, ?)',
-            [user_id, amount, 'withdraw', 'completed', 'User withdrawal', persian_date]
+            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date, to_card) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [user_id, amount, 'withdraw', 'completed', 'User withdrawal', persian_date, to_card]
         );
         res.status(201).json({ message: 'Withdrawal successful.' });
     } catch (err) {
         res.status(500).json({ message: 'Withdrawal failed.', error: err.message });
+    }
+};
+
+exports.registerBankCard = async (req, res) => {
+    const { user_id, bank_name, bank_number, card_holder } = req.body;
+    if (!user_id || !bank_name || !bank_number || !card_holder) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+    try {
+        await pool.query(
+            'INSERT INTO banks (user_id, bank_name, bank_number, card_holder) VALUES (?, ?, ?, ?)',
+            [user_id, bank_name, bank_number, card_holder]
+        );
+        res.status(201).json({ message: 'Bank card registered successfully.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to register bank card.', error: err.message });
+    }
+};
+
+exports.getUserInfo = async (req, res) => {
+    const { user_id } = req.params;
+    if (!user_id) {
+        return res.status(400).json({ message: 'User ID is required.' });
+    }
+    try {
+        const [rows] = await pool.query('SELECT user_id, user_email, user_name, user_balance, user_role, created_at FROM users WHERE user_id = ?', [user_id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        res.status(200).json({ user: rows[0] });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch user info.', error: err.message });
+    }
+};
+
+exports.getUserWithdrawals = async (req, res) => {
+    const { user_id } = req.params;
+    if (!user_id) {
+        return res.status(400).json({ message: 'User ID is required.' });
+    }
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM transactions WHERE user_id = ? AND transaction_type = ? ORDER BY created_at DESC',
+            [user_id, 'withdraw']
+        );
+        res.status(200).json({ withdrawals: rows });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch withdrawals.', error: err.message });
+    }
+};
+
+exports.getUserCards = async (req, res) => {
+    const { user_id } = req.params;
+    if (!user_id) {
+        return res.status(400).json({ message: 'User ID is required.' });
+    }
+    try {
+        const [rows] = await pool.query('SELECT bank_id, bank_name, bank_number, card_holder, is_active, created_at FROM banks WHERE user_id = ?', [user_id]);
+        res.status(200).json({ cards: rows });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch user cards.', error: err.message });
+    }
+};
+
+exports.createTicket = async (req, res) => {
+    const { user_id, subject, message } = req.body;
+    if (!user_id || !subject || !message) {
+        return res.status(400).json({ message: 'user_id, subject, and message are required.' });
+    }
+    try {
+        await pool.query(
+            'INSERT INTO ticket (user_id, subject, message) VALUES (?, ?, ?)',
+            [user_id, subject, message]
+        );
+        res.status(201).json({ message: 'Ticket created successfully.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to create ticket.', error: err.message });
+    }
+};
+
+exports.getUserTickets = async (req, res) => {
+    const { user_id } = req.params;
+    if (!user_id) {
+        return res.status(400).json({ message: 'User ID is required.' });
+    }
+    try {
+        const [rows] = await pool.query('SELECT * FROM ticket WHERE user_id = ? ORDER BY created_at DESC', [user_id]);
+        res.status(200).json({ tickets: rows });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch tickets.', error: err.message });
     }
 };
