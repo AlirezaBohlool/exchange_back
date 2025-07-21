@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 // Import all route modules
-const authRouter = require('./auth/index');
-const dashboardRouter = require('./dashboard/index');
+const auth = require('./auth/index');
+const dashboard = require('./dashboard/index');
+const admin = require('./admin/index');
 
 // Mount routes
-
-router.use('/auth', authRouter);
-router.use('/dashboard', dashboardRouter);
+router.use('/auth', auth);
+router.use('/dashboard', dashboard);
+router.use('/admin', admin);
 
 module.exports = router;

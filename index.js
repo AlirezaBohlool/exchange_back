@@ -1,9 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-
 const app = express();
 const cors = require('cors');
+
 
 // Enable CORS for all origins (or specify origin if you want to restrict)
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));

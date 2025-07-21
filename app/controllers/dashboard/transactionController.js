@@ -65,17 +65,15 @@ exports.deposit = async (req, res) => {
         return res.status(400).json({ message: 'Valid user_id and amount are required.' });
     }
     try {
-        // Update user balance
-        await pool.query('UPDATE users SET user_balance = user_balance + ? WHERE user_id = ?', [amount, user_id]);
-        // Insert transaction record
+        // Insert transaction record with 'pending' status
         const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
         await pool.query(
             'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date) VALUES (?, ?, ?, ?, ?, ?)',
-            [user_id, amount, 'deposit', 'completed', 'User deposit', persian_date]
+            [user_id, amount, 'deposit', 'pending', 'User deposit request', persian_date]
         );
-        res.status(201).json({ message: 'Deposit successful.' });
+        res.status(201).json({ message: 'Deposit request submitted successfully.' });
     } catch (err) {
-        res.status(500).json({ message: 'Deposit failed.', error: err.message });
+        res.status(500).json({ message: 'Deposit request failed.', error: err.message });
     }
 };
 
@@ -94,17 +92,15 @@ exports.withdraw = async (req, res) => {
         if (currentBalance < amount) {
             return res.status(400).json({ message: 'Insufficient balance.' });
         }
-        // Update user balance
-        await pool.query('UPDATE users SET user_balance = user_balance - ? WHERE user_id = ?', [amount, user_id]);
-        // Insert transaction record with to_card
+        // Insert transaction record with to_card and 'pending' status
         const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
         await pool.query(
             'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date, to_card) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [user_id, amount, 'withdraw', 'completed', 'User withdrawal', persian_date, to_card]
+            [user_id, amount, 'withdraw', 'pending', 'User withdrawal request', persian_date, to_card]
         );
-        res.status(201).json({ message: 'Withdrawal successful.' });
+        res.status(201).json({ message: 'Withdrawal request submitted successfully.' });
     } catch (err) {
-        res.status(500).json({ message: 'Withdrawal failed.', error: err.message });
+        res.status(500).json({ message: 'Withdrawal request failed.', error: err.message });
     }
 };
 
