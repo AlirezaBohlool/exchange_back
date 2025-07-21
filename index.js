@@ -16,15 +16,7 @@ app.use(express.json());
 const mainRouter = require('./app/router');
 app.use('/api', mainRouter);
 
-// // Serve React static files
-// app.use(express.static(path.join(__dirname, 'build')));
-
-// // Fallback for React client-side routing (SPA)
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'build', 'index.html'));
-// });
-
 // Start server
-app.listen(port, () => {
-    console.log(`🚀 Server running on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
