@@ -6,7 +6,7 @@ const cors = require('cors');
 
 
 // Enable CORS for all origins (or specify origin if you want to restrict)
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: 'http://45.139.10.210:3000', credentials: true }));
 const port = process.env.PORT || 4000;
 
 // Middleware to parse JSON
