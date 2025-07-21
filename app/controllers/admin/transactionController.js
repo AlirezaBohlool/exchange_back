@@ -71,7 +71,13 @@ exports.updateUserBalance = async (req, res) => {
 
 exports.getPendingTransactions = async (req, res) => {
     try {
-        const [rows] = await pool.query("SELECT * FROM transactions WHERE status = 'pending' AND (transaction_type = 'deposit' OR transaction_type = 'withdraw') ORDER BY created_at DESC");
+        const [rows] = await pool.query(`
+            SELECT t.*, u.user_name 
+            FROM transactions t
+            JOIN users u ON t.user_id = u.user_id
+            WHERE t.status = 'pending' AND (t.transaction_type = 'deposit' OR t.transaction_type = 'withdraw') 
+            ORDER BY t.created_at DESC
+        `);
         res.status(200).json({ transactions: rows });
     } catch (err) {
         res.status(500).json({ message: 'Failed to fetch pending transactions.', error: err.message });
