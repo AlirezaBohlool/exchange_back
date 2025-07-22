@@ -61,17 +61,23 @@ exports.buy = async (req, res) => {
 
 exports.deposit = async (req, res) => {
     const { user_id, amount } = req.body;
+
     if (!user_id || !amount || isNaN(amount) || amount <= 0) {
         return res.status(400).json({ message: 'Valid user_id and amount are required.' });
     }
+
     try {
-        // Insert transaction record with 'pending' status
         const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
+        
         await pool.query(
-            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date) VALUES (?, ?, ?, ?, ?, ?)',
-            [user_id, amount, 'deposit', 'pending', 'User deposit request', persian_date]
+            `INSERT INTO transactions 
+             (user_id, amount, transaction_type, status, description, persian_date, coin) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [user_id, amount, 'deposit', 'pending', 'User deposit request', persian_date, 'IRT'] // فرض بر اینکه coin همیشه IRT هست
         );
+
         res.status(201).json({ message: 'Deposit request submitted successfully.' });
+
     } catch (err) {
         res.status(500).json({ message: 'Deposit request failed.', error: err.message });
     }
