@@ -7,7 +7,7 @@ const cors = require('cors');
 
 // Enable CORS for all origins (or specify origin if you want to restrict)
 app.use(cors({ origin: 'http://185.243.48.94:3000', credentials: true }));
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 2087;
 
 // Middleware to parse JSON
 app.use(express.json());
