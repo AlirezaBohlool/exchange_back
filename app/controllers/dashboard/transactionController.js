@@ -89,7 +89,6 @@ exports.withdraw = async (req, res) => {
         return res.status(400).json({ message: 'Valid user_id, amount, and to_card are required.' });
     }
     try {
-        // Check current balance
         const [rows] = await pool.query('SELECT user_balance FROM users WHERE user_id = ?', [user_id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found.' });
@@ -98,11 +97,10 @@ exports.withdraw = async (req, res) => {
         if (currentBalance < amount) {
             return res.status(400).json({ message: 'Insufficient balance.' });
         }
-        // Insert transaction record with to_card and 'pending' status
         const persian_date = moment().locale('fa').format('YYYY/MM/DD HH:mm:ss');
         await pool.query(
-            'INSERT INTO transactions (user_id, amount, transaction_type, status, description, persian_date, to_card) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [user_id, amount, 'withdraw', 'pending', 'User withdrawal request', persian_date, to_card]
+            'INSERT INTO transactions (user_id, amount, coin, transaction_type, status, description, persian_date, to_card) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [user_id, amount, 'N/A', 'withdraw', 'pending', 'User withdrawal request', persian_date, to_card]
         );
         res.status(201).json({ message: 'Withdrawal request submitted successfully.' });
     } catch (err) {
