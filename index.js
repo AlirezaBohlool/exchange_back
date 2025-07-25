@@ -6,7 +6,23 @@ const cors = require('cors');
 
 
 // Enable CORS for all origins (or specify origin if you want to restrict)
-app.use(cors({ origin: 'http://185.243.48.94:3000', credentials: true }));
+const allowedOrigins = [
+  'http://185.243.48.94:3000',
+  'http://alterbit.ir',
+  'http://www.alterbit.ir'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 const port = process.env.PORT || 2087;
 
 // Middleware to parse JSON
