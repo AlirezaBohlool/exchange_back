@@ -9,7 +9,8 @@ const cors = require('cors');
 const allowedOrigins = [
   'http://185.243.48.94:3000',
   'http://alterbit.ir',
-  'http://www.alterbit.ir'
+  'http://www.alterbit.ir',
+  'http://localhost:5173',
 ];
 
 app.use(cors({
@@ -35,5 +36,5 @@ app.use('/api', mainRouter);
 app.get('/api/ping', (req, res) => res.send('pong'));
 // Start server
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Server running on http://0.0.0.0:${port}`);
+  console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
